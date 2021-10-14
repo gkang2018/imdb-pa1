@@ -1,7 +1,7 @@
 import React from 'react'
 
 
-const Landing = () => {
+const Landing = ({handleShowSnackbar}) => {
     return (
         <h1>Welcome to the IMDB movie site</h1>
     )

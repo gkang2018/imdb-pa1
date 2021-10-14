@@ -11,6 +11,7 @@ import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
+import Snackbar from '@material-ui/core/Snackbar';
 
 // Screen Imports 
 import Home from './components/Home'
@@ -35,7 +36,26 @@ const useStyles = makeStyles((theme) => ({
 function App() {
   const classes = useStyles();
   const history = useHistory();
-  const [isLoggedIn, setLoggedIn] = useState(false)
+  const [isLoggedIn, setLoggedIn] = useState(false);
+  const [showSnackbar, setShowSnackbar] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarConfig, setSnackbarConfig] = useState({
+    vertical: 'top',
+    horizontal: 'center',
+  })
+
+
+  const handleClose = () => {
+    setShowSnackbar(false);
+    setSnackbarMessage("");
+  }
+
+
+  const handleShowSnackbar = (show, message) => {
+    setShowSnackbar(show);
+    setSnackbarMessage(message)
+  }
+
 
   const checkAuthStatus = () => {
     const token = getToken(); 
@@ -55,6 +75,7 @@ function App() {
     checkAuthStatus();
   })
 
+  const {vertical, horizontal} = snackbarConfig;
 
   return (
     <div>
@@ -76,19 +97,26 @@ function App() {
       </Toolbar>
     </AppBar>
   </div>
+  <Snackbar
+        anchorOrigin={{vertical, horizontal}}
+        key={`${vertical},${horizontal}`}
+        open={showSnackbar}
+        onClose={handleClose}
+        message={snackbarMessage}> 
+  </Snackbar>
   <div>
     <Switch>
           <Route path="/login">
-            <Login />
+            <Login handleShowSnackbar = {handleShowSnackbar} />
           </Route>
           <Route path="/signup">
-            <Signup />
+            <Signup handleShowSnackbar = {handleShowSnackbar} />
           </Route>
           <Route path="/home">
-            <Home />
+            <Home handleShowSnackbar = {handleShowSnackbar} />
           </Route> 
           <Route path="/">
-            <Landing />
+            <Landing handleShowSnackbar = {handleShowSnackbar} />
           </Route>
       </Switch>
   </div>

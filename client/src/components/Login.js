@@ -13,7 +13,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const Login = () => {
+const Login = ({handleShowSnackbar}) => {
     const classes = useStyles();
     const [state, setState] = useState({
         email: "",
@@ -37,9 +37,16 @@ const Login = () => {
                 'Content-Type': 'application/x-www-form-urlencoded'
              }});
             const response = await raw.json();
-            const token = response.token;
-            setToken(token);
-            history.push("/home")
+            if (raw.status === 200) {
+                const token = response.token;
+                setToken(token);
+                history.push("/home")
+            }
+            else {
+                // Unable to login
+                console.log("Could not login");
+                handleShowSnackbar(true, "Unable to login. Please try again with valid credentials")
+            }
         } catch (error) {
             console.log(error);
         }

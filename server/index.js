@@ -26,6 +26,63 @@ app.get("/fetch-actors", authMiddleware.checkToken, async (req, res) => {
     }
 })
 
+app.get("/fetch-locations", authMiddleware.checkToken, async (req, res) => {
+    try {
+        const [locations, cols] = await QueryService.fetchLocations();
+        return res.status(200).send({message: "Successfully fetched locations", locations: locations, cols: cols})
+    } catch (error) {
+        return res.status(400).send({message: "Unable to fetch locations"})
+    }
+})
+
+app.get("/fetch-roles", authMiddleware.checkToken, async (req, res) => {
+    try {
+        const [roles, cols] = await QueryService.fetchRoles();
+        return res.status(200).send({message: "Successfully fetched roles", roles: roles, cols: cols})
+    } catch (error) {
+        return res.status(400).send({message: "Unable to fetch roles"})
+    }
+})
+
+
+app.get("/fetch-series", authMiddleware.checkToken, async (req, res) => {
+    try {
+        const [series, cols] = await QueryService.fetchSeries();
+        return res.status(200).send({message: "Successfully fetched series", series: series, cols: cols})
+    } catch (error) {
+        return res.status(400).send({message: "Unable to fetch series"})
+    }
+})
+
+app.get("/fetch-awards", authMiddleware.checkToken, async (req, res) => {
+    try {
+        const [awards, cols] = await QueryService.fetchAwards();
+        return res.status(200).send({message: "Successfully fetched awards", awards: awards, cols: cols})
+    } catch (error) {
+        return res.status(400).send({message: "Unable to fetch awards"})
+    }
+})
+
+
+app.get("/fetch-likes", authMiddleware.checkToken, async (req, res) => {
+    try {
+        const [likes, cols] = await QueryService.fetchLikes();
+        return res.status(200).send({message: "Successfully fetched likes", likes: likes, cols: cols})
+    } catch (error) {
+        return res.status(400).send({message: "Unable to fetch likes"})
+    }
+})
+
+
+app.get("/fetch-genres", authMiddleware.checkToken, async (req, res) => {
+    try {
+        const [genres, cols] = await QueryService.fetchGenres();
+        return res.status(200).send({message: "Successfully fetched genres", genres: genres, cols: cols})
+    } catch (error) {
+        return res.status(400).send({message: "Unable to fetch genres"})
+    }
+})
+
 app.post("/signup", async (req, res) => {
     try {
         const email = req.body.email; 

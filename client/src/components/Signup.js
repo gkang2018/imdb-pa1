@@ -13,7 +13,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const Signup = () => {
+const Signup = ({handleShowSnackbar}) => {
     const classes = useStyles();
     const [state, setState] = useState({
         email: "",
@@ -39,12 +39,19 @@ const Signup = () => {
                 'Content-Type': 'application/x-www-form-urlencoded'
              }});
             const response = await raw.json();
-            const token = response.token;
-            setToken(token);
-            history.push("/home")
-
+            if (raw.status === 200) {
+                const token = response.token;
+                setToken(token);
+                history.push("/home")
+            }
+            else {
+                // Unable to signup
+                console.log("Could not signup");
+                handleShowSnackbar(true, "Unable to signup. Please try again with valid credentials")
+            }
         } catch (error) {
             console.log(error);
+            handleShowSnackbar(true, "Unable to signup")
         }
     }   
 

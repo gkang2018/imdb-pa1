@@ -59,6 +59,9 @@ const login = async (email) => {
       const token = issueJWT(user.email);
       return token;
     }
+    else {
+      throw new Error("User account not found")
+    }
   } catch (error) {
     throw error;
   }
