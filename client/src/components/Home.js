@@ -158,6 +158,25 @@ const Home = ({handleShowSnackbar}) => {
         }
     }
 
+    const fetchUsers = async () => {
+        try {
+            const token = getToken();
+            const response = await fetch("/fetch-users", {
+                method: "GET",
+                headers: {
+                    "Authorization": token
+                }
+            });
+            const {users, cols} = await response.json();
+            setIsMovies(false);
+            setData(users);
+            setColumns(cols);
+        } catch (error) {
+            console.log(error)
+            handleShowSnackbar(true, "Unable to fetch users")
+        }
+    }
+
     const fetchLikes = async () => {
         try {
             const token = getToken();
@@ -186,6 +205,7 @@ const Home = ({handleShowSnackbar}) => {
                 <Button style={{marginRight: "1%"}} variant="contained" color="primary" onClick={fetchActors}>View all actors</Button>
                 <Button style={{marginRight: "1%"}} variant="contained" color="primary" onClick={fetchAwards}>View all awards</Button>
                 <Button style={{marginRight: "1%"}} variant="contained" color="primary" onClick={fetchGenres}>View all genres</Button>
+                <Button style={{marginRight: "1%"}} variant="contained" color="primary" onClick={fetchUsers}>View all users</Button>
                 <Button style={{marginRight: "1%"}} variant="contained" color="primary" onClick={fetchLikes}>View all likes</Button>
                 <Button style={{marginRight: "1%"}} variant="contained" color="primary" onClick={fetchAwards}>View all awards</Button>
                 <Button style={{marginRight: "1%"}} variant="contained" color="primary" onClick={fetchLocations}>View all locations</Button>

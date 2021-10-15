@@ -71,9 +71,32 @@ function App() {
     history.push("/");
   }
 
+
+  const initializeDB = async () => {
+    try {
+        const response = await fetch("/initialize-db", {
+            method: "GET",
+        });
+        if (!response.ok) {
+          handleShowSnackbar(true, "Unable to initialize DB")
+        }
+    } catch (error) {
+        console.log(error)
+        handleShowSnackbar(true, "Unable to initialize db")
+    }
+}
+
+
+
+  // Fire only when app first loads, to initialize and populate DB
+  useEffect(() => {
+    initializeDB();
+  }, [])
+
   useEffect(() => {
     checkAuthStatus();
   })
+
 
   const {vertical, horizontal} = snackbarConfig;
 
@@ -87,6 +110,7 @@ function App() {
         </Typography>
         {isLoggedIn ? 
         <div>
+          <Button color="inherit" onClick={() => history.push("/home")}>View Tables</Button>
           <Button color="inherit" onClick={handleLogout}>Logout</Button>
         </div> :  
         <div>

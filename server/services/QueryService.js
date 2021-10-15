@@ -4,7 +4,6 @@ const pool = mysql.createPool({
     host: 'localhost',
     user: 'root',
     password: '',
-    database: 'project_1',
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0
@@ -35,12 +34,124 @@ const extractColumns = (rows) => {
 }
 
 
+const initializeDB = async () => {
+    try {
+        // Initialize Tables
+        await pool.query(`CREATE DATABASE IF NOT EXISTS IMDB_PA1`);
+        await pool.query(`USE IMDB_PA1`);
+        await pool.query(`CREATE TABLE IF NOT EXISTS MotionPicture (id int(11), name varchar(255), rating float(11), production varchar(255), budget int(11), PRIMARY KEY (id))`);
+        await pool.query(`CREATE TABLE IF NOT EXISTS Users (email varchar(255), name varchar(255), age int(11), PRIMARY KEY (email))`);
+        await pool.query(`CREATE TABLE IF NOT EXISTS Likes (uemail varchar(255), mpid int(11), PRIMARY KEY (uemail, mpid), FOREIGN KEY (uemail) REFERENCES Users(email), 
+        FOREIGN KEY (mpid) REFERENCES MotionPicture(id))`);
+        await pool.query(`CREATE TABLE IF NOT EXISTS Movies (mpid int(11) NOT NULL, boxoffice_collection varchar(255), 
+        PRIMARY KEY (mpid), FOREIGN KEY (mpid) REFERENCES MotionPicture(id));`);
+        await pool.query(`CREATE TABLE IF NOT EXISTS Series (
+            mpid int(11) NOT NULL,
+            season_count int(11),
+            PRIMARY KEY (mpid),
+            FOREIGN KEY (mpid) REFERENCES MotionPicture(id));`)
+        await pool.query(`CREATE TABLE IF NOT EXISTS People (
+            id int(11),
+            name varchar(255),
+            nationality varchar(255),
+            dob varchar(255),
+            gender varchar(255),
+            PRIMARY KEY (id)
+        )`)
+        await pool.query(`CREATE TABLE IF NOT EXISTS Role (
+            mpid int(11),
+            pid int(11),
+            role_name varchar(255),
+            PRIMARY KEY (mpid, pid), 
+            FOREIGN KEY (mpid) REFERENCES MotionPicture(id),
+            FOREIGN KEY (pid) REFERENCES People(id)
+        );`)
+        await pool.query(`CREATE Table IF NOT EXISTS Award (
+            mpid int(11),
+            pid int(11),
+            award_name varchar(255),
+            award_year int(11),
+            PRIMARY KEY (mpid, pid),
+            FOREIGN KEY (mpid) REFERENCES MotionPicture(id),
+            FOREIGN KEY (pid) REFERENCES People(id)
+        );`)
+
+        await pool.query(`
+        CREATE TABLE IF NOT EXISTS Genre (
+            mpid int(11),
+            genre_name varchar(255),
+            PRIMARY KEY(mpid),
+            FOREIGN KEY (mpid) REFERENCES MotionPicture(id)
+        );`)
+
+        await pool.query(`
+        CREATE TABLE IF NOT EXISTS Location (
+            mpid int(11) NOT NULL,
+            zip int(11),
+            city varchar(255),
+            country varchar(255),
+            PRIMARY KEY (mpid, zip),
+            FOREIGN KEY (mpid) REFERENCES MotionPicture(id)
+            ON DELETE CASCADE
+        )`)
+
+        // Add dummy data
+
+        // Motion Pictures
+        await pool.query(`INSERT IGNORE INTO MotionPicture (id, name, rating, production, budget) VALUES (?, ?, ?, ?, ?)`, [101, "Breaking Bad", 9.1, "High Bridge Productions", 195000000])
+        await pool.query(`INSERT IGNORE INTO MotionPicture (id, name, rating, production, budget) VALUES (?, ?, ?, ?, ?)`, [102, "Band of Brothers", 9.5, "DreamWorks", 125000000])
+        
+        
+        // People
+        await pool.query(`INSERT IGNORE INTO People (id, name, nationality, dob, gender) VALUES (?, ?, ?, ?, ?)`, [1, "Bryan Cranston", "USA", "1956-12-12", "M"])
+        await pool.query(`INSERT IGNORE INTO People (id, name, nationality, dob, gender) VALUES (?, ?, ?, ?, ?)`, [2, "Aaron Paul", "USA", "1982-01-12", "M"])
+
+
+        // Users
+        await pool.query(`INSERT IGNORE INTO Users (email, name, age) VALUES (?, ?, ?)`, ["test@gmail.com", "User1", 12])
+        await pool.query(`INSERT IGNORE INTO Users (email, name, age) VALUES (?, ?, ?)`, ["test2@gmail.com", "Testing", 50])
+
+        // Movies
+        await pool.query(`INSERT IGNORE INTO Movies (mpid, boxoffice_collection) VALUES (?, ?)`, [102, "N/A"])
+
+        // Series 
+        await pool.query(`INSERT IGNORE INTO Series (mpid, season_count) VALUES (?, ?)`, [101, 5])
+
+        // Role
+        await pool.query(`INSERT IGNORE INTO Role (mpid, pid, role_name) VALUES (?, ?, ?)`, [101, 1, "Actor"])
+        await pool.query(`INSERT IGNORE INTO Role (mpid, pid, role_name) VALUES (?, ?, ?)`, [101, 2, "Actor"])
+
+        // Likes
+        await pool.query(`INSERT IGNORE INTO Likes (uemail, mpid) VALUES (?, ?)`, ["test@gmail.com", 101])
+        await pool.query(`INSERT IGNORE INTO Likes (uemail, mpid) VALUES (?, ?)`, ["test@gmail.com", 102])
+        
+        // Award
+        await pool.query(`INSERT IGNORE INTO Award (mpid, pid, award_name, award_year) VALUES (?, ?, ?, ?)`, [101, 1, "Best Actor", 2014])
+        
+        // Genre
+        await pool.query(`INSERT IGNORE INTO Genre (mpid, genre_name) VALUES (?, ?)`, [101, "Drama"])
+
+        // Location
+        await pool.query(`INSERT IGNORE INTO Location (mpid, zip, city, country) VALUES (?, ?, ?, ?)`, [101, 02215, "Boston", "USA"])
+
+        return true;
+    } catch (error) {
+        throw error;
+    }
+}
+
+
 const fetchMovies = async () => {
     try {
+        await pool.query(`USE IMDB_PA1`);
         const [rows, fields] = await pool.query(`SELECT * FROM MotionPicture`, []);
         if (rows.length === 0) {
             console.log('No movies found');
-            return null
+            // If no row data is available then just print out table schema 
+            const [rows, fields] = await pool.query(`Describe MotionPicture`, []);
+            const rowValues = rowParser(rows);
+            const columnNames = extractColumns(rowValues);
+            return [rowValues, columnNames]
         }
         else {
             const movies = rowParser(rows);
@@ -57,11 +168,15 @@ const fetchMovies = async () => {
 
 const fetchActors = async () => {
     try {
+        await pool.query(`USE IMDB_PA1`);
         const [rows, fields] = await pool.query(`SELECT * FROM People`, []);
         if (rows.length === 0) {
             console.log('No actors found');
-            return null
-        }
+            // If no row data is available then just print out table schema 
+            const [rows, fields] = await pool.query(`Describe People`, []);
+            const rowValues = rowParser(rows);
+            const columnNames = extractColumns(rowValues);
+            return [rowValues, columnNames]        }
         else {
             const actors = rowParser(rows);
             const columnNames = extractColumns(actors);
@@ -76,10 +191,15 @@ const fetchActors = async () => {
 
 const fetchLocations = async () => {
     try {
+        await pool.query(`USE IMDB_PA1`);
         const [rows, fields] = await pool.query(`SELECT * FROM Location`, []);
         if (rows.length === 0) {
             console.log('No locations found');
-            return null
+            // If no row data is available then just print out table schema 
+            const [rows, fields] = await pool.query(`Describe Location`, []);
+            const rowValues = rowParser(rows);
+            const columnNames = extractColumns(rowValues);
+            return [rowValues, columnNames]
         }
         else {
             const locations = rowParser(rows);
@@ -95,10 +215,15 @@ const fetchLocations = async () => {
 
 const fetchRoles = async () => {
     try {
+        await pool.query(`USE IMDB_PA1`);
         const [rows, fields] = await pool.query(`SELECT * FROM Role`, []);
         if (rows.length === 0) {
             console.log('No locations found');
-            return null
+            // If no row data is available then just print out table schema 
+            const [rows, fields] = await pool.query(`Describe Role`, []);
+            const rowValues = rowParser(rows);
+            const columnNames = extractColumns(rowValues);
+            return [rowValues, columnNames]
         }
         else {
             const locations = rowParser(rows);
@@ -114,6 +239,7 @@ const fetchRoles = async () => {
 
 const fetchSeries = async () => {
     try {
+        await pool.query(`USE IMDB_PA1`);
         const [rows, fields] = await pool.query(`SELECT * FROM Series`, []);
         if (rows.length === 0) {
             console.log('No series found');
@@ -137,6 +263,7 @@ const fetchSeries = async () => {
 
 const fetchAwards = async () => {
     try {
+        await pool.query(`USE IMDB_PA1`);
         const [rows, fields] = await pool.query(`SELECT * FROM Award`, []);
         if (rows.length === 0) {
             console.log('No awards found');
@@ -161,6 +288,7 @@ const fetchAwards = async () => {
 
 const fetchGenres = async () => {
     try {
+        await pool.query(`USE IMDB_PA1`);
         const [rows, fields] = await pool.query(`SELECT * FROM Genre`, []);
         if (rows.length === 0) {
             console.log('No genres found');
@@ -183,8 +311,33 @@ const fetchGenres = async () => {
 }
 
 
+const fetchUsers = async () => {
+    try {
+        await pool.query(`USE IMDB_PA1`);
+        const [rows, fields] = await pool.query(`SELECT * FROM Users`, []);
+        if (rows.length === 0) {
+            console.log('No users found');
+            // If no row data is available then just print out table schema 
+            const [rows, fields] = await pool.query(`Describe Users`, []);
+            const rowValues = rowParser(rows);
+            const columnNames = extractColumns(rowValues);
+            return [rowValues, columnNames]
+        }
+        else {
+            const users = rowParser(rows);
+            const columnNames = extractColumns(users);
+            return [users, columnNames]
+        }
+    }
+    catch(error) {
+        console.log(error);
+        throw error;
+    }
+}
+
 const fetchLikes = async () => {
     try {
+        await pool.query(`USE IMDB_PA1`);
         const [rows, fields] = await pool.query(`SELECT * FROM Likes`, []);
         if (rows.length === 0) {
             console.log('No likes found');
@@ -208,6 +361,7 @@ const fetchLikes = async () => {
 
 const fetchUser = async (email) => {
     try {
+        await pool.query(`USE IMDB_PA1`);
         const [rows, fields] = await pool.query(`SELECT * FROM Users WHERE email = ?`, [email]);
         if (rows.length === 0) {
             console.log('No user found');
@@ -229,6 +383,7 @@ const signupUser = async (email, name, age) => {
         // fetch user and see if exists
         const user = await fetchUser(email);
         if (!user) {
+            await pool.query(`USE IMDB_PA1`);
             const [results, errors] = await pool.query(`INSERT INTO Users (email, name, age) VALUES (?, ?, ?)`, [email, name, age]);
             return true;
         }
@@ -256,6 +411,7 @@ const loginUser = async (email) => {
 
 module.exports = {
     fetchUser: fetchUser, 
+    fetchUsers: fetchUsers,
     signupUser: signupUser, 
     loginUser: loginUser, 
     fetchMovies: fetchMovies,
@@ -266,4 +422,5 @@ module.exports = {
     fetchAwards: fetchAwards,
     fetchGenres: fetchGenres,
     fetchLikes: fetchLikes,
+    initializeDB: initializeDB
 }

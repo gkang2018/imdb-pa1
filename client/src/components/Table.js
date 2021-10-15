@@ -1,5 +1,5 @@
 import React, {useState} from 'react'
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button } from '@material-ui/core'
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button, Checkbox } from '@material-ui/core'
 
 const TableComponent = ({rows, columns, isMovies}) => {
 
@@ -21,7 +21,7 @@ const TableComponent = ({rows, columns, isMovies}) => {
                 {columns.map((col) => (
                     <TableCell>{row[col]}</TableCell>
                 ))}
-                {isMovies && <TableCell><Button onClick = {handleLike}>Like</Button></TableCell>}
+                {isMovies && <TableCell><Checkbox></Checkbox></TableCell>}
             </TableRow>)
         })
     }

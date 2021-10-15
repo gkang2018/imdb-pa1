@@ -8,8 +8,8 @@ Contributors: Gagandeep Kang and Moonis Thadey
 
 For this application, we elected to use a client-server architecture. 
 
-Our front-end uses React.js [React.js](https://reactjs.org/)
-Our server (back-end) uses [Node.js and Express](https://expressjs.com/)
+Our front-end uses [React.js](https://reactjs.org/) <br />
+Our server (back-end) uses [Node.js and Express](https://expressjs.com/) <br />
 Backend is connected to a MySQL database which is running through XAMPP 
 
 ```
@@ -35,8 +35,6 @@ You should see a version number like this:
 ```
 v16.9.1
 ```
-
-
 
 2. Navigate to the root directory of the project. And open up two terminal instances. If running on VSCode, you can use the split terminal option
 
@@ -106,14 +104,27 @@ Listening on port 8080
 
 ```
 
+## Database Configuration 
 
-## Examples
+We are using MySQL for our project database. Ensure that you have MySQL running. 
 
-* [Single Component User Authentication](https://easybase.io/react-and-react-native-user-authentication/)
+Currently, MySQL is running and expected to be on `localhost`. You don't need to initialize a project database but if you do, please name it 
+`IMDB_PA1`. However our `initialize-db/` route will create the tables and populate them with dummy data
 
-* [Stateful Database](https://easybase.io/react-database-app-tutorial/)
+See the configuration below for how to set up your SQL server. 
+The following is from the `QueryService.js` file in the `utils/` directory
 
-* [Google Analytics Integration](https://easybase.io/react/#google-analytics-integration)
+```
+const pool = mysql.createPool({
+    host: 'localhost',
+    user: 'root',
+    password: '',
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
+});
+```
+
 
 <!-- CONTACT -->
 ## Contact

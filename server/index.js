@@ -8,6 +8,17 @@ const authMiddleware = require('./utils/auth-middleware');
 app.use(bodyParser.urlencoded({extended: true}))
 
 
+app.get("/initialize-db", async (req, res) => {
+    try {
+        const didInitialize = await QueryService.initializeDB();
+        return res.status(200).send({message: "Initialized DB", didInitialize: didInitialize})
+    } catch (error) {
+        console.log(error);
+        return res.status(400).send({message: "Unable to initialize the database", didInitialize: false})
+    }
+})
+
+
 app.get("/fetch-movies", authMiddleware.checkToken, async (req, res) => {
     try {
         const [movies, cols] = await QueryService.fetchMovies();
@@ -60,6 +71,15 @@ app.get("/fetch-awards", authMiddleware.checkToken, async (req, res) => {
         return res.status(200).send({message: "Successfully fetched awards", awards: awards, cols: cols})
     } catch (error) {
         return res.status(400).send({message: "Unable to fetch awards"})
+    }
+})
+
+app.get("/fetch-users", authMiddleware.checkToken, async (req, res) => {
+    try {
+        const [users, cols] = await QueryService.fetchUsers();
+        return res.status(200).send({message: "Successfully fetched users", users: users, cols: cols})
+    } catch (error) {
+        return res.status(400).send({message: "Unable to fetch users"})
     }
 })
 
