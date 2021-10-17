@@ -50,6 +50,10 @@ function App() {
     setSnackbarMessage("");
   }
 
+  const handleLogin = (status) => {
+    setLoggedIn(status);
+  }
+
 
   const handleShowSnackbar = (show, message) => {
     setShowSnackbar(show);
@@ -131,10 +135,10 @@ function App() {
   <div>
     <Switch>
           <Route path="/login">
-            <Login handleShowSnackbar = {handleShowSnackbar} />
+            <Login handleLogin={handleLogin} handleShowSnackbar = {handleShowSnackbar} />
           </Route>
           <Route path="/signup">
-            <Signup handleShowSnackbar = {handleShowSnackbar} />
+            <Signup handleShowSnackbar = {handleShowSnackbar} handleLogin={handleLogin} />
           </Route>
           <Route path="/home">
             <Home handleShowSnackbar = {handleShowSnackbar} />

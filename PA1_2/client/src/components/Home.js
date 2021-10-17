@@ -4,7 +4,7 @@ import TableComponent from './Table'
 import { getToken } from '../utils/useLocalStorage';
 import { useHistory } from 'react-router';
 
-const Home = ({handleShowSnackbar}) => {
+const Home = ({handleShowSnackbar, handleLogin}) => {
     const [data, setData] = useState([]);
     const [columns, setColumns] = useState([]);
     const [isMovies, setIsMovies] = useState(false);

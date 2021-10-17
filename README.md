@@ -4,6 +4,17 @@
 
 Contributors: Gagandeep Kang and Moonis Thadey
 
+
+## Progress
+Here are a few images showing what the current state of the UI looks like
+
+1. Dashboard ![Alt text](PA1_2/images/UI-Dashboard.png)
+2. Signup ![Alt text](PA1_2/images/UI-Signup.png)
+3. Login ![Alt text](PA1_2/images/UI-Login.png)
+4. Landing ![Alt text](PA1_2/images/UI-Landing.png)
+
+
+
 ## Getting Started and Installation
 
 For this application, we elected to use a client-server architecture. 
@@ -36,7 +47,7 @@ You should see a version number like this:
 v16.9.1
 ```
 
-2. Navigate to the root directory of the project. And open up two terminal instances. If running on VSCode, you can use the split terminal option
+2. Navigate inside of the PA1_2 directory of the project. And open up two terminal instances. If running on VSCode, you can use the split terminal option
 
 In first terminal, navigate into the `client` directory 
 ```

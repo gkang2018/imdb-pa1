@@ -13,7 +13,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const Login = ({handleShowSnackbar}) => {
+const Login = ({handleShowSnackbar, handleLogin}) => {
     const classes = useStyles();
     const [state, setState] = useState({
         email: "",
@@ -39,6 +39,7 @@ const Login = ({handleShowSnackbar}) => {
             const response = await raw.json();
             if (raw.status === 200) {
                 const token = response.token;
+                handleLogin(true);
                 setToken(token);
                 history.push("/home")
             }
