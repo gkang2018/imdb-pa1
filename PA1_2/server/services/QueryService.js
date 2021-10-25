@@ -378,6 +378,77 @@ const fetchUser = async (email) => {
     }
 }
 
+const likeMovie = async (uemail, mpid) => {
+    try {
+        await pool.query(`USE IMDB_PA1`);
+        await pool.query(`INSERT IGNORE INTO Likes (uemail, mpid) VALUES (?, ?)`, [uemail, mpid]);
+        return true;
+    } catch (error) {
+        console.log(error.message)
+        throw new Error(error.message)
+    }   
+}
+
+const findMPByName = async (query) => {
+    try {
+        await pool.query(`USE IMDB_PA1`);
+        const [rows, fields] = await pool.query(`SELECT m.name, m.rating, m.production, m.budget FROM MotionPicture m WHERE m.name like ?`, [query + "%"]);
+        if (rows.length === 0) {
+            console.log('No motion pictures found');
+            return [[], []]
+        }
+        else {
+            const mps = rowParser(rows);
+            const columnNames = extractColumns(mps);
+            return [mps, columnNames]
+        }
+    }
+    catch(error) {
+        console.log(error);
+        throw error;
+    }
+}
+
+const findLikesByEmail = async (query) => {
+    try {
+        await pool.query(`USE IMDB_PA1`);
+        const [rows, fields] = await pool.query(`SELECT m.name, m.rating, m.production, m.budget FROM MotionPicture m WHERE m.id in (SELECT l.mpid FROM Likes l WHERE l.uemail = ?)`, [query]);
+        if (rows.length === 0) {
+            console.log('No motion pictures found');
+            return [[], []]
+        }
+        else {
+            const mps = rowParser(rows);
+            const columnNames = extractColumns(mps);
+            return [mps, columnNames]
+        }
+    }
+    catch(error) {
+        console.log(error);
+        throw error;
+    }
+}
+
+const findMPByLocation = async (query) => {
+    try {
+        await pool.query(`USE IMDB_PA1`);
+        const [rows, fields] = await pool.query(`SELECT * FROM MotionPicture m WHERE m.id in (SELECT l.mpid FROM Location l WHERE l.country = ?)`, [query]);
+        if (rows.length === 0) {
+            console.log('No motion pictures found');
+            return [[], []]
+        }
+        else {
+            const mps = rowParser(rows);
+            const columnNames = extractColumns(mps);
+            return [mps, columnNames]
+        }
+    }
+    catch(error) {
+        console.log(error);
+        throw error;
+    }
+}
+
 const signupUser = async (email, name, age) => {
     try {
         // fetch user and see if exists
@@ -422,5 +493,9 @@ module.exports = {
     fetchAwards: fetchAwards,
     fetchGenres: fetchGenres,
     fetchLikes: fetchLikes,
+    likeMovie: likeMovie,
+    findMPByName: findMPByName,
+    findLikesByEmail: findLikesByEmail,
+    findMPByLocation: findMPByLocation,
     initializeDB: initializeDB
 }

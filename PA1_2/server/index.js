@@ -103,6 +103,44 @@ app.get("/fetch-genres", authMiddleware.checkToken, async (req, res) => {
     }
 })
 
+app.post("/like-movie", authMiddleware.checkToken, async (req, res) => {
+    try {
+        const user = await req.user;
+        const isSuccessful = await QueryService.likeMovie(user.email, req.body.mpid);
+        return res.status(200).send({message: "Successfully liked movie"})
+    } catch (error) {
+        return res.status(400).send({message: "Unable to like movie"})
+    }
+})
+
+app.post("/find-mp-by-name", authMiddleware.checkToken, async(req, res) => {
+    try {
+        const [mps, cols] = await QueryService.findMPByName(req.body.query);
+        return res.status(200).send({message: "Found motion pictures", mps: mps, cols: cols })
+    } catch (error) {
+        return res.status(400).send({message: "Unable to find motion picture by name"})
+    }
+})
+
+app.post("/find-likes-by-email", authMiddleware.checkToken, async(req, res) => {
+    try {
+        const [likes, cols] = await QueryService.findLikesByEmail(req.body.query);
+        return res.status(200).send({message: "Found motion pictures", likes: likes, cols: cols })
+    } catch (error) {
+        return res.status(400).send({message: "Unable to find motion picture by name"})
+    }
+})
+
+app.post("/find-mp-by-location", authMiddleware.checkToken, async(req, res) => {
+    try {
+        const [mps, cols] = await QueryService.findMPByLocation(req.body.query);
+        return res.status(200).send({message: "Found motion pictures", mps: mps, cols: cols })
+    } catch (error) {
+        return res.status(400).send({message: "Unable to find motion picture by location"})
+    }
+})
+
+
 app.post("/signup", async (req, res) => {
     try {
         const email = req.body.email; 

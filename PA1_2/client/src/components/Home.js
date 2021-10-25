@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from 'react'
-import { Button, ButtonGroup, Snackbar} from '@material-ui/core';
+import { Button, ButtonGroup, Snackbar, TextField} from '@material-ui/core';
+import SearchBar from "./SearchBar"
 import TableComponent from './Table'
 import { getToken } from '../utils/useLocalStorage';
 import { useHistory } from 'react-router';
@@ -8,7 +9,12 @@ const Home = ({handleShowSnackbar, handleLogin}) => {
     const [data, setData] = useState([]);
     const [columns, setColumns] = useState([]);
     const [isMovies, setIsMovies] = useState(false);
-    const history = useHistory()
+    const [parameterizedState, setState] = useState({
+        queryMotionPicName: "",
+        queryLikesWithEmail: "",
+        queryMPByLocation: "", 
+    })
+    const history = useHistory();
 
     const checkAuthToken = () => {
         const token = getToken();
@@ -196,6 +202,107 @@ const Home = ({handleShowSnackbar, handleLogin}) => {
         }
     }
 
+    const handleInputChange = (key, e) => {
+        setState((prevState) => ({
+            ...prevState,
+            [key]: e.target.value
+        }))
+    }
+
+    const findMotionPicByName = async () => {
+        try {
+            const token = getToken();
+            if (token !== "") {
+                const response = await fetch("/find-mp-by-name", {
+                    method: "POST",
+                    headers: {
+                        "Authorization": token
+                    },
+                    body: new URLSearchParams({
+                        query: parameterizedState.queryMotionPicName
+                    })
+                });
+                const {mps, cols} = await response.json();
+                if (mps.length === 0 || cols.length === 0) {
+                    handleShowSnackbar(true, "Unable to fetch motion pic with query " + parameterizedState.queryMotionPicName);
+                }
+                setIsMovies(false);
+                setData(mps);
+                setColumns(cols);
+            }
+            else {
+                handleShowSnackbar(true, "Please login again as session has expired");
+                history.push("/login")
+            }
+        } catch (error) {
+            console.log(error)
+            handleShowSnackbar(true, error.message)
+        }
+    }
+
+
+    const findLikesByEmail = async () => {
+        try {
+            const token = getToken();
+            if (token !== "") {
+                const response = await fetch("/find-likes-by-email", {
+                    method: "POST",
+                    headers: {
+                        "Authorization": token
+                    },
+                    body: new URLSearchParams({
+                        query: parameterizedState.queryLikesWithEmail
+                    })
+                });
+                const {likes, cols} = await response.json();
+                if (likes.length === 0 || cols.length === 0) {
+                    handleShowSnackbar(true, "Unable to fetch likes with query " + parameterizedState.queryLikesWithEmail);
+                }
+                setIsMovies(false);
+                setData(likes);
+                setColumns(cols);
+            }
+            else {
+                handleShowSnackbar(true, "Please login again as session has expired");
+                history.push("/login")
+            }
+        } catch (error) {
+            console.log(error)
+            handleShowSnackbar(true, error.message)
+        }
+    }
+
+
+    const findMPByLocation = async () => {
+        try {
+            const token = getToken();
+            if (token !== "") {
+                const response = await fetch("/find-mp-by-location", {
+                    method: "POST",
+                    headers: {
+                        "Authorization": token
+                    },
+                    body: new URLSearchParams({
+                        query: parameterizedState.queryMPByLocation
+                    })
+                });
+                const {mps, cols} = await response.json();
+                if (mps.length === 0 || cols.length === 0) {
+                    handleShowSnackbar(true, "Unable to fetch mps with query " + parameterizedState.queryMPByLocation);
+                }
+                setIsMovies(false);
+                setData(mps);
+                setColumns(cols);
+            }
+            else {
+                handleShowSnackbar(true, "Please login again as session has expired");
+                history.push("/login")
+            }
+        } catch (error) {
+            console.log(error)
+            handleShowSnackbar(true, error.message)
+        }
+    }
 
     return (
         <div>
@@ -211,7 +318,12 @@ const Home = ({handleShowSnackbar, handleLogin}) => {
                 <Button style={{marginRight: "1%"}} variant="contained" color="primary" onClick={fetchLocations}>View all locations</Button>
                 <Button style={{marginRight: "1%"}} variant="contained" color="primary" onClick={fetchRoles}>View all roles</Button>
             </ButtonGroup>
-            <TableComponent columns={columns} rows={data} isMovies = {isMovies}/>
+            <ButtonGroup style={{marginTop: "5%", marginBottom: "5%", marginRight: "5%"}}>
+                <SearchBar placeholder={"Search Motion Picture by Name"} keyName = {"queryMotionPicName"} handleSubmit={findMotionPicByName} onChange={handleInputChange} />
+                <SearchBar placeholder={"Search User's likes by email"} keyName = {"queryLikesWithEmail"} handleSubmit={findLikesByEmail} onChange={handleInputChange} />
+                <SearchBar placeholder={"Search Motion Picture by location"} keyName = {"queryMPByLocation"} handleSubmit={findMPByLocation} onChange={handleInputChange} />
+            </ButtonGroup>
+            <TableComponent columns={columns} rows={data} isMovies = {isMovies} handleShowSnackbar={handleShowSnackbar} />
         </div>
     )
 }
