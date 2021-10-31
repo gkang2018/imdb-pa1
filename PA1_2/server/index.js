@@ -138,7 +138,16 @@ app.post("/find-mp-by-location", authMiddleware.checkToken, async(req, res) => {
     } catch (error) {
         return res.status(400).send({message: "Unable to find motion picture by location"})
     }
-})
+})  
+
+app.post("/find-director-by-zip", authMiddleware.checkToken, async(req, res) => {
+    try {
+        const [directors, cols] = await QueryService.findDirectorByZipcode(req.body.query);
+        return res.status(200).send({message: "Found directors", directors: directors, cols: cols })
+    } catch (error) {
+        return res.status(400).send({message: "Unable to find directors by zipcode"})
+    }
+})  
 
 
 app.post("/signup", async (req, res) => {

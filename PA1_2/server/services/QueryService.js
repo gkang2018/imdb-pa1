@@ -449,6 +449,68 @@ const findMPByLocation = async (query) => {
     }
 }
 
+
+const findDirectorByZipcode = async (query) => {
+    try {
+        await pool.query(`USE IMDB_PA1`);
+        const [rows, fields] = await pool.query(`SELECT p.name as director, mp.name FROM Location l, Role r, MotionPicture mp, Series s, People p WHERE r.mpid = l.mpid AND l.mpid = s.mpid AND mp.id = s.mpid AND p.id = r.pid AND l.zip = ?`, [query]);
+        if (rows.length === 0) {
+            console.log('No directors found');
+            return [[], []]
+        }
+        else {
+            console.log(rows)
+            const directors = rowParser(rows);
+            const columnNames = extractColumns(directors);
+            return [directors, columnNames]
+        }  
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
+}
+
+const findPeopleReceivedKAwards = async (query) => {
+    try {
+        await pool.query(`USE IMDB_PA1`);
+        const [rows, fields] = await pool.query(`SELECT p.name as director, mp.name FROM Location l, Role r, MotionPicture mp, Series s, People p WHERE r.mpid = l.mpid AND l.mpid = s.mpid AND mp.id = s.mpid AND p.id = r.pid AND l.zip = ?`, [query]);
+        if (rows.length === 0) {
+            console.log('No directors found');
+            return [[], []]
+        }
+        else {
+            console.log(rows)
+            const directors = rowParser(rows);
+            const columnNames = extractColumns(directors);
+            return [directors, columnNames]
+        }  
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
+}
+
+
+const findSameBirthDayActors = async (query) => {
+    try {
+        await pool.query(`USE IMDB_PA1`);
+        const [rows, fields] = await pool.query(`SELECT p1.name as Actor1, p2.name as Actor2, p1.dob as DOB FROM People p1, People p2, Role r WHERE p1.id != p2.id AND p1.dob = p2.dob AND p1.id = r.pid`, [query]);
+        if (rows.length === 0) {
+            console.log('No directors found');
+            return [[], []]
+        }
+        else {
+            console.log(rows)
+            const directors = rowParser(rows);
+            const columnNames = extractColumns(directors);
+            return [directors, columnNames]
+        }  
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
+}
+
 const signupUser = async (email, name, age) => {
     try {
         // fetch user and see if exists
@@ -497,5 +559,8 @@ module.exports = {
     findMPByName: findMPByName,
     findLikesByEmail: findLikesByEmail,
     findMPByLocation: findMPByLocation,
+    findDirectorByZipcode: findDirectorByZipcode,
+    findPeopleReceivedKAwards: findPeopleReceivedKAwards,
+    findSameBirthDayActors: findSameBirthDayActors,
     initializeDB: initializeDB
 }

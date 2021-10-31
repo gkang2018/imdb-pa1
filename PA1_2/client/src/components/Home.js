@@ -12,7 +12,8 @@ const Home = ({handleShowSnackbar, handleLogin}) => {
     const [parameterizedState, setState] = useState({
         queryMotionPicName: "",
         queryLikesWithEmail: "",
-        queryMPByLocation: "", 
+        queryMPByLocation: "",
+        queryDirectorByZip: "", 
     })
     const history = useHistory();
 
@@ -304,6 +305,38 @@ const Home = ({handleShowSnackbar, handleLogin}) => {
         }
     }
 
+
+    const findDirectorByZipcode = async () => {
+        try {
+            const token = getToken();
+            if (token !== "") {
+                const response = await fetch("/find-director-by-zip", {
+                    method: "POST",
+                    headers: {
+                        "Authorization": token
+                    },
+                    body: new URLSearchParams({
+                        query: parameterizedState.queryDirectorByZip
+                    })
+                });
+                const {directors, cols} = await response.json();
+                if (directors.length === 0 || cols.length === 0) {
+                    handleShowSnackbar(true, "Unable to fetch directors with query " + parameterizedState.queryDirectorByZip);
+                }
+                setIsMovies(false);
+                setData(directors);
+                setColumns(cols);
+            }
+            else {
+                handleShowSnackbar(true, "Please login again as session has expired");
+                history.push("/login")
+            }
+        } catch (error) {
+            console.log(error)
+            handleShowSnackbar(true, error.message)
+        }   
+    }
+
     return (
         <div>
             <ButtonGroup style={{marginTop: "5%", marginBottom: "5%", marginRight: "5%"}}>
@@ -322,6 +355,9 @@ const Home = ({handleShowSnackbar, handleLogin}) => {
                 <SearchBar placeholder={"Search Motion Picture by Name"} keyName = {"queryMotionPicName"} handleSubmit={findMotionPicByName} onChange={handleInputChange} />
                 <SearchBar placeholder={"Search User's likes by email"} keyName = {"queryLikesWithEmail"} handleSubmit={findLikesByEmail} onChange={handleInputChange} />
                 <SearchBar placeholder={"Search Motion Picture by location"} keyName = {"queryMPByLocation"} handleSubmit={findMPByLocation} onChange={handleInputChange} />
+            </ButtonGroup>
+            <ButtonGroup style={{marginBottom: "5%", marginRight: "5%"}}>
+                <SearchBar placeholder={"Search TV Director by zip"} keyName = {"queryDirectorByZip"} handleSubmit={findDirectorByZipcode} onChange={handleInputChange} />
             </ButtonGroup>
             <TableComponent columns={columns} rows={data} isMovies = {isMovies} handleShowSnackbar={handleShowSnackbar} />
         </div>
