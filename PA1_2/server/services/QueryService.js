@@ -39,9 +39,9 @@ const initializeDB = async () => {
         // Initialize Tables
         await pool.query(`CREATE DATABASE IF NOT EXISTS IMDB_PA1`);
         await pool.query(`USE IMDB_PA1`);
-        await pool.query(`CREATE TABLE IF NOT EXISTS MotionPicture (id int(11), name varchar(255), rating float(11), production varchar(255), budget int(11), PRIMARY KEY (id))`);
+        await pool.query(`CREATE TABLE IF NOT EXISTS MotionPicture (id int(11), name varchar(255), rating float(11), production varchar(255), budget bigint(20), PRIMARY KEY (id))`);
         await pool.query(`CREATE TABLE IF NOT EXISTS Users (email varchar(255), name varchar(255), age int(11), PRIMARY KEY (email))`);
-        await pool.query(`CREATE TABLE IF NOT EXISTS Likes (uemail varchar(255), mpid int(11), PRIMARY KEY (uemail, mpid), FOREIGN KEY (uemail) REFERENCES Users(email), 
+        await pool.query(`CREATE TABLE IF NOT EXISTS Likes (mpid int(11), uemail varchar(255), PRIMARY KEY (mpid, uemail), FOREIGN KEY (uemail) REFERENCES Users(email), 
         FOREIGN KEY (mpid) REFERENCES MotionPicture(id))`);
         await pool.query(`CREATE TABLE IF NOT EXISTS Movies (mpid int(11) NOT NULL, boxoffice_collection varchar(255), 
         PRIMARY KEY (mpid), FOREIGN KEY (mpid) REFERENCES MotionPicture(id));`);
@@ -62,7 +62,7 @@ const initializeDB = async () => {
             mpid int(11),
             pid int(11),
             role_name varchar(255),
-            PRIMARY KEY (mpid, pid), 
+            PRIMARY KEY (mpid, pid, role_name), 
             FOREIGN KEY (mpid) REFERENCES MotionPicture(id),
             FOREIGN KEY (pid) REFERENCES People(id)
         );`)
@@ -71,7 +71,7 @@ const initializeDB = async () => {
             pid int(11),
             award_name varchar(255),
             award_year int(11),
-            PRIMARY KEY (mpid, pid),
+            PRIMARY KEY (mpid, pid, award_name, award_year),
             FOREIGN KEY (mpid) REFERENCES MotionPicture(id),
             FOREIGN KEY (pid) REFERENCES People(id)
         );`)
@@ -80,7 +80,7 @@ const initializeDB = async () => {
         CREATE TABLE IF NOT EXISTS Genre (
             mpid int(11),
             genre_name varchar(255),
-            PRIMARY KEY(mpid),
+            PRIMARY KEY(mpid, genre_name),
             FOREIGN KEY (mpid) REFERENCES MotionPicture(id)
         );`)
 
@@ -95,44 +95,44 @@ const initializeDB = async () => {
             ON DELETE CASCADE
         )`)
 
-        // Add dummy data
+        // // Add dummy data
 
-        // Motion Pictures
-        await pool.query(`INSERT IGNORE INTO MotionPicture (id, name, rating, production, budget) VALUES (?, ?, ?, ?, ?)`, [101, "Breaking Bad", 9.1, "High Bridge Productions", 195000000])
-        await pool.query(`INSERT IGNORE INTO MotionPicture (id, name, rating, production, budget) VALUES (?, ?, ?, ?, ?)`, [102, "Band of Brothers", 9.5, "DreamWorks", 125000000])
+        // // Motion Pictures
+        // await pool.query(`INSERT IGNORE INTO MotionPicture (id, name, rating, production, budget) VALUES (?, ?, ?, ?, ?)`, [101, "Breaking Bad", 9.1, "High Bridge Productions", 195000000])
+        // await pool.query(`INSERT IGNORE INTO MotionPicture (id, name, rating, production, budget) VALUES (?, ?, ?, ?, ?)`, [102, "Band of Brothers", 9.5, "DreamWorks", 125000000])
         
         
-        // People
-        await pool.query(`INSERT IGNORE INTO People (id, name, nationality, dob, gender) VALUES (?, ?, ?, ?, ?)`, [1, "Bryan Cranston", "USA", "1956-12-12", "M"])
-        await pool.query(`INSERT IGNORE INTO People (id, name, nationality, dob, gender) VALUES (?, ?, ?, ?, ?)`, [2, "Aaron Paul", "USA", "1982-01-12", "M"])
+        // // People
+        // await pool.query(`INSERT IGNORE INTO People (id, name, nationality, dob, gender) VALUES (?, ?, ?, ?, ?)`, [1, "Bryan Cranston", "USA", "1956-12-12", "M"])
+        // await pool.query(`INSERT IGNORE INTO People (id, name, nationality, dob, gender) VALUES (?, ?, ?, ?, ?)`, [2, "Aaron Paul", "USA", "1982-01-12", "M"])
 
 
-        // Users
-        await pool.query(`INSERT IGNORE INTO Users (email, name, age) VALUES (?, ?, ?)`, ["test@gmail.com", "User1", 12])
-        await pool.query(`INSERT IGNORE INTO Users (email, name, age) VALUES (?, ?, ?)`, ["test2@gmail.com", "Testing", 50])
+        // // Users
+        // await pool.query(`INSERT IGNORE INTO Users (email, name, age) VALUES (?, ?, ?)`, ["test@gmail.com", "User1", 12])
+        // await pool.query(`INSERT IGNORE INTO Users (email, name, age) VALUES (?, ?, ?)`, ["test2@gmail.com", "Testing", 50])
 
-        // Movies
-        await pool.query(`INSERT IGNORE INTO Movies (mpid, boxoffice_collection) VALUES (?, ?)`, [102, "N/A"])
+        // // Movies
+        // await pool.query(`INSERT IGNORE INTO Movies (mpid, boxoffice_collection) VALUES (?, ?)`, [102, "N/A"])
 
-        // Series 
-        await pool.query(`INSERT IGNORE INTO Series (mpid, season_count) VALUES (?, ?)`, [101, 5])
+        // // Series 
+        // await pool.query(`INSERT IGNORE INTO Series (mpid, season_count) VALUES (?, ?)`, [101, 5])
 
-        // Role
-        await pool.query(`INSERT IGNORE INTO Role (mpid, pid, role_name) VALUES (?, ?, ?)`, [101, 1, "Actor"])
-        await pool.query(`INSERT IGNORE INTO Role (mpid, pid, role_name) VALUES (?, ?, ?)`, [101, 2, "Actor"])
+        // // Role
+        // await pool.query(`INSERT IGNORE INTO Role (mpid, pid, role_name) VALUES (?, ?, ?)`, [101, 1, "Actor"])
+        // await pool.query(`INSERT IGNORE INTO Role (mpid, pid, role_name) VALUES (?, ?, ?)`, [101, 2, "Actor"])
 
-        // Likes
-        await pool.query(`INSERT IGNORE INTO Likes (uemail, mpid) VALUES (?, ?)`, ["test@gmail.com", 101])
-        await pool.query(`INSERT IGNORE INTO Likes (uemail, mpid) VALUES (?, ?)`, ["test@gmail.com", 102])
+        // // Likes
+        // await pool.query(`INSERT IGNORE INTO Likes (uemail, mpid) VALUES (?, ?)`, ["test@gmail.com", 101])
+        // await pool.query(`INSERT IGNORE INTO Likes (uemail, mpid) VALUES (?, ?)`, ["test@gmail.com", 102])
         
-        // Award
-        await pool.query(`INSERT IGNORE INTO Award (mpid, pid, award_name, award_year) VALUES (?, ?, ?, ?)`, [101, 1, "Best Actor", 2014])
+        // // Award
+        // await pool.query(`INSERT IGNORE INTO Award (mpid, pid, award_name, award_year) VALUES (?, ?, ?, ?)`, [101, 1, "Best Actor", 2014])
         
-        // Genre
-        await pool.query(`INSERT IGNORE INTO Genre (mpid, genre_name) VALUES (?, ?)`, [101, "Drama"])
+        // // Genre
+        // await pool.query(`INSERT IGNORE INTO Genre (mpid, genre_name) VALUES (?, ?)`, [101, "Drama"])
 
-        // Location
-        await pool.query(`INSERT IGNORE INTO Location (mpid, zip, city, country) VALUES (?, ?, ?, ?)`, [101, 02215, "Boston", "USA"])
+        // // Location
+        // await pool.query(`INSERT IGNORE INTO Location (mpid, zip, city, country) VALUES (?, ?, ?, ?)`, [101, 02215, "Boston", "USA"])
 
         return true;
     } catch (error) {
