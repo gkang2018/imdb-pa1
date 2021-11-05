@@ -627,7 +627,7 @@ const findMoviesHigherRatingComedy = async () => {
 const findTop5WithMostPeople = async () => {
     try {
         await pool.query(`USE IMDB_PA1`);
-        const [rows, fields] = await pool.query(`SELECT mp.name, COUNT(*) as num_roles FROM Role r, MotionPicture mp, Movies m, People p WHERE mp.id = m.mpid AND mp.id = r.mpid AND p.id = r.pid GROUP BY r.mpid ORDER BY COUNT(*) DESC LIMIT 5`);
+        const [rows, fields] = await pool.query(`SELECT mp.name, totalPeople.people_count, totalRoles.num_roles FROM (SELECT PeopleRole.mpid, COUNT(*) as people_count FROM (SELECT * FROM Role r GROUP BY r.mpid, r.pid) as PeopleRole GROUP BY PeopleRole.mpid ORDER BY people_count DESC) as totalPeople, (SELECT r.mpid, COUNT(*) as num_roles FROM Role r GROUP BY r.mpid ORDER BY COUNT(*)) as totalRoles, MotionPicture mp, Movies m WHERE totalRoles.mpid = totalPeople.mpid AND totalRoles.mpid = mp.id AND mp.id = m.mpid ORDER BY totalPeople.people_count DESC LIMIT 5;`);
         if (rows.length === 0) {
             console.log('No movies found');
             return [[], []]
@@ -646,7 +646,7 @@ const findTop5WithMostPeople = async () => {
 const findSameBirthDayActors = async () => {
     try {
         await pool.query(`USE IMDB_PA1`);
-        const [rows, fields] = await pool.query(`SELECT p1.name as Actor1, p2.name as Actor2, p1.dob as DOB FROM People p1, People p2, Role r WHERE p1.id != p2.id AND p1.dob = p2.dob AND p1.id = r.pid`);
+        const [rows, fields] = await pool.query(`SELECT DISTINCT p1.name as "Actor 1 Name", p2.name as "Actor 2 Name", p1.dob as DOB FROM People p1, People p2, Role r1, Role r2 WHERE p1.id != p2.id AND p1.dob = p2.dob AND r1.pid = p1.id AND r2.pid = p2.id AND r1.role_name = "Actor" AND r2.role_name = "Actor" GROUP BY CONCAT(LEAST(p1.id, p2.id), GREATEST(p1.id, p2.id));`);
         if (rows.length === 0) {
             console.log('No actors found');
             return [[], []]

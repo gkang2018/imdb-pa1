@@ -590,6 +590,62 @@ const Home = ({handleShowSnackbar, handleLogin}) => {
             handleShowSnackbar(true, error.message)
         }   
     }
+
+    const findTop5MoviesMostPeople = async () => {
+        try {
+            const token = getToken();
+            if (token !== "") {
+                const response = await fetch("/find-top-five-with-most-people", {
+                    method: "POST",
+                    headers: {
+                        "Authorization": token
+                    }
+                });
+                const {movies, cols} = await response.json();
+                if (movies.length === 0 || cols.length === 0) {
+                    handleShowSnackbar(true, "Unable to fetch movies");
+                }
+                setIsMovies(false);
+                setData(movies);
+                setColumns(cols);
+            }
+            else {
+                handleShowSnackbar(true, "Please login again as session has expired");
+                history.push("/login")
+            }
+        } catch (error) {
+            console.log(error)
+            handleShowSnackbar(true, error.message)
+        }   
+    }
+
+    const findSameBirthDayActors = async () => {
+        try {
+            const token = getToken();
+            if (token !== "") {
+                const response = await fetch("/find-same-bday-actors", {
+                    method: "POST",
+                    headers: {
+                        "Authorization": token
+                    }
+                });
+                const {actors, cols} = await response.json();
+                if (actors.length === 0 || cols.length === 0) {
+                    handleShowSnackbar(true, "Unable to fetch actors");
+                }
+                setIsMovies(false);
+                setData(actors);
+                setColumns(cols);
+            }
+            else {
+                handleShowSnackbar(true, "Please login again as session has expired");
+                history.push("/login")
+            }
+        } catch (error) {
+            console.log(error)
+            handleShowSnackbar(true, error.message)
+        }   
+    }
     
 
     return (
@@ -606,6 +662,16 @@ const Home = ({handleShowSnackbar, handleLogin}) => {
                 <Button style={{marginRight: "1%"}} variant="contained" color="primary" onClick={fetchLocations}>View all locations</Button>
                 <Button style={{marginRight: "1%"}} variant="contained" color="primary" onClick={fetchRoles}>View all roles</Button>
             </ButtonGroup>
+            <ButtonGroup style={{marginBottom: "5%", marginRight: "5%"}}>
+                <Button style={{marginRight: "1%"}} variant="contained" color="primary" onClick={findYoungestAndOldest}>Find youngest and oldest</Button>
+                <Button style={{marginRight: "1%"}} variant="contained" color="primary" onClick={findTopTwoThrillers}>Find top 2 thrillers in Boston</Button>
+                <Button style={{marginRight: "1%"}} variant="contained" color="primary" onClick={findActorsMarvelAndWarner}>Find actors in Marvel and Warner</Button>
+            </ButtonGroup>
+            <ButtonGroup style={{marginBottom: "1%", marginRight: "5%"}}>
+                <Button style={{marginRight: "1%"}} variant="contained" color="primary" onClick={findMoviesHigherRatingComedy}>Find mps higher avg rating than comedy</Button>
+                <Button style={{marginRight: "1%"}} variant="contained" color="primary" onClick={findTop5MoviesMostPeople}>Find top 5 movies with the highest number of people playing a role</Button>
+                <Button style={{marginRight: "1%"}} variant="contained" color="primary" onClick={findSameBirthDayActors}>Find actors with the same birthday</Button>
+            </ButtonGroup>
             <ButtonGroup style={{marginTop: "5%", marginBottom: "5%", marginRight: "5%"}}>
                 <SearchBar placeholder={"Search Motion Picture by Name"} keyName = {"queryMotionPicName"} handleSubmit={findMotionPicByName} onChange={handleInputChange} />
                 <SearchBar placeholder={"Search User's likes by email"} keyName = {"queryLikesWithEmail"} handleSubmit={findLikesByEmail} onChange={handleInputChange} />
@@ -614,19 +680,11 @@ const Home = ({handleShowSnackbar, handleLogin}) => {
             <ButtonGroup style={{marginBottom: "5%", marginRight: "5%"}}>
                 <SearchBar placeholder={"Search TV Director by zip"} keyName = {"queryDirectorByZip"} handleSubmit={findDirectorByZipcode} onChange={handleInputChange} />
                 <SearchBar placeholder={"Search People Received K awards"} keyName = {"queryPeopleKAwards"} handleSubmit={findPeopleKAwards} onChange={handleInputChange} />
-                <Button style={{marginRight: "1%"}} variant="contained" color="primary" onClick={findYoungestAndOldest}>Find youngest and oldest</Button>
                 <SearchBar placeholder={"Search Producers Budget Box Office"} keyName = {"queryProducersBudgetBox"} handleSubmit={findProducersByBudgetAndBoxOffice} onChange={handleInputChange} />
             </ButtonGroup>
             <ButtonGroup style={{marginBottom: "5%", marginRight: "5%"}}>
                 <SearchBar placeholder={"People with multiple roles in movies with rating more than k"} keyName = {"queryPeopleMultRoleRatingK"} handleSubmit={findPeopleMultRolesRatingMoreThanK} onChange={handleInputChange} />
-                <Button style={{marginRight: "1%"}} variant="contained" color="primary" onClick={findTopTwoThrillers}>Find top 2 thrillers in Boston</Button>
                 <SearchBar placeholder={"Search Movies by likes and age"} keyName = {"queryMoviesLikesAndAge"} handleSubmit={findMoviesByLikesAndAge} onChange={handleInputChange} />
-                <Button style={{marginRight: "1%"}} variant="contained" color="primary" onClick={findActorsMarvelAndWarner}>Find actors in Marvel and Warner</Button>
-            </ButtonGroup>
-            <ButtonGroup style={{marginBottom: "5%", marginRight: "5%"}}>
-                <Button style={{marginRight: "1%"}} variant="contained" color="primary" onClick={findMoviesHigherRatingComedy}>Find mps higher avg rating than comedy 2</Button>
-                <SearchBar placeholder={"Search Movies by likes and age"} keyName = {"queryMoviesLikesAndAge"} handleSubmit={findMoviesByLikesAndAge} onChange={handleInputChange} />
-                <Button style={{marginRight: "1%"}} variant="contained" color="primary" onClick={findActorsMarvelAndWarner}>Find actors in Marvel and Warner</Button>
             </ButtonGroup>
             <TableComponent columns={columns} rows={data} isMovies = {isMovies} handleShowSnackbar={handleShowSnackbar} />
         </div>
