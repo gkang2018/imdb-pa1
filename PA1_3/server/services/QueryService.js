@@ -550,7 +550,7 @@ const findPeopleMultRoles = async (query) => {
 const findTopTwoThrillers = async () => {
     try {
         await pool.query(`USE IMDB_PA1`);
-        const [rows, fields] = await pool.query(`SELECT mp.name, mp.rating FROM MotionPicture mp, Genre g WHERE g.mpid = mp.id AND g.genre_name = "Thriller" AND mp.rating in (SELECT mp.rating from Genre g1, MotionPicture mp1 where mp1.id = g1.mpid AND g1.genre_name = "Thriller" ORDER BY mp.rating DESC) AND mp.id in (SELECT DISTINCT l1.mpid FROM Location l1 WHERE l1.city = "Boston" AND l1.mpid NOT IN (SELECT DISTINCT l.mpid FROM Location l WHERE l.city != "Boston"))`, []);
+        const [rows, fields] = await pool.query(`SELECT DISTINCT mp.name, mp.rating FROM Genre g, MotionPicture mp, Movies m, (SELECT DISTINCT l1.mpid FROM Location l1 WHERE l1.city = "Boston" AND l1.mpid NOT IN (SELECT DISTINCT l.mpid FROM Location l WHERE l.city != "Boston")) as shotInBos WHERE mp.id = g.mpid AND g.genre_name = "Thriller" AND shotInBos.mpid = mp.id AND m.mpid = mp.id ORDER BY mp.rating DESC LIMIT 2;`, []);
         if (rows.length === 0) {
             console.log('No movies found');
             return [[], []]
@@ -627,7 +627,7 @@ const findMoviesHigherRatingComedy = async () => {
 const findTop5WithMostPeople = async () => {
     try {
         await pool.query(`USE IMDB_PA1`);
-        const [rows, fields] = await pool.query(`SELECT mp.name, totalPeople.people_count, totalRoles.num_roles FROM (SELECT PeopleRole.mpid, COUNT(*) as people_count FROM (SELECT * FROM Role r GROUP BY r.mpid, r.pid) as PeopleRole GROUP BY PeopleRole.mpid ORDER BY people_count DESC) as totalPeople, (SELECT r.mpid, COUNT(*) as num_roles FROM Role r GROUP BY r.mpid ORDER BY COUNT(*)) as totalRoles, MotionPicture mp, Movies m WHERE totalRoles.mpid = totalPeople.mpid AND totalRoles.mpid = mp.id AND mp.id = m.mpid ORDER BY totalPeople.people_count DESC LIMIT 5;`);
+        const [rows, fields] = await pool.query(`SELECT mp.name, totalPeople.people_count, totalRoles.num_roles FROM (SELECT PeopleRole.mpid, COUNT(*) as people_count FROM (SELECT * FROM Role r GROUP BY r.mpid, r.pid) as PeopleRole GROUP BY PeopleRole.mpid ORDER BY people_count DESC) as totalPeople, (SELECT tempRoles.mpid, COUNT(*) as num_roles FROM (SELECT DISTINCT r.mpid, role_name FROM Role r GROUP BY r.mpid, role_name) as tempRoles GROUP by tempRoles.mpid) as totalRoles, MotionPicture mp, Movies m WHERE totalRoles.mpid = totalPeople.mpid AND totalRoles.mpid = mp.id AND mp.id = m.mpid ORDER BY totalPeople.people_count DESC LIMIT 5;`);
         if (rows.length === 0) {
             console.log('No movies found');
             return [[], []]
