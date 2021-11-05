@@ -149,6 +149,104 @@ app.post("/find-director-by-zip", authMiddleware.checkToken, async(req, res) => 
     }
 })  
 
+app.post("/find-people-k-awards", authMiddleware.checkToken, async(req, res) => {
+    try {
+        const [people, cols] = await QueryService.findPeopleReceivedKAwards(req.body.query);
+        return res.status(200).send({message: "Found people", people: people, cols: cols })
+    } catch (error) {
+        return res.status(400).send({message: "Unable to find people who received k awards"})
+    }
+})  
+
+app.post("/find-youngest-oldest-actor", authMiddleware.checkToken, async(req, res) => {
+    try {
+        const [actors, cols] = await QueryService.findYoungestAndOldest();
+        return res.status(200).send({message: "Found actors", actors: actors, cols: cols })
+    } catch (error) {
+        return res.status(400).send({message: "Unable to find youngest and oldest actors"})
+    }
+})
+
+
+app.post("/find-producers-budget-boxOffice", authMiddleware.checkToken, async(req, res) => {
+    try {
+        const [producers, cols] = await QueryService.findProducersByBudgetAndBoxOffice(req.body.x, req.body.y);
+        return res.status(200).send({message: "Found producers by budget and box office", producers: producers, cols: cols })
+    } catch (error) {
+        return res.status(400).send({message: "Unable to find producers by budget and box office"})
+    }
+})
+
+app.post("/find-people-mult-roles", authMiddleware.checkToken, async(req, res) => {
+    try {
+        const [people, cols] = await QueryService.findPeopleMultRoles(req.body.query);
+        return res.status(200).send({message: "Found people with multiple roles", people: people, cols: cols })
+    } catch (error) {
+        return res.status(400).send({message: "Unable to find people with multiple roles"})
+    }
+})
+
+app.post("/find-top-two-thrillers", authMiddleware.checkToken, async(req, res) => {
+    try {
+        const [movies, cols] = await QueryService.findTopTwoThrillers();
+        return res.status(200).send({message: "Found top 2 thrillers", movies: movies, cols: cols })
+    } catch (error) {
+        return res.status(400).send({message: "Unable to find top two thrillers"})
+    }
+})
+
+
+app.post("/find-movies-likes-ages", authMiddleware.checkToken, async(req, res) => {
+    try {
+        const [movies, cols] = await QueryService.findMoviesByLikesAndAge(req.body.x, req.body.y);
+        return res.status(200).send({message: "Found movies by likes and ages", movies: movies, cols: cols })
+    } catch (error) {
+        return res.status(400).send({message: "Unable to find movies by likes and age"})
+    }
+})
+
+
+app.post("/find-actors-marvel-warner", authMiddleware.checkToken, async(req, res) => {
+    try {
+        const [actors, cols] = await QueryService.findActorsBothMarvelWarner();
+        return res.status(200).send({message: "Found actors in both Marvel and Warner", actors: actors, cols: cols })
+    } catch (error) {
+        return res.status(400).send({message: "Unable to find actors in both Marvel and Warner"})
+    }
+})
+
+
+app.post("/find-movies-higher-comedy", authMiddleware.checkToken, async(req, res) => {
+    try {
+        const [movies, cols] = await QueryService.findMoviesHigherRatingComedy();
+        return res.status(200).send({message: "Found movies higher rated than comedy", movies: movies, cols: cols })
+    } catch (error) {
+        return res.status(400).send({message: "Unable to find movies higher rated than comedy"})
+    }
+})
+
+
+app.post("/find-top-five-with-most-people", authMiddleware.checkToken, async(req, res) => {
+    try {
+        const [movies, cols] = await QueryService.findTop5WithMostPeople();
+        return res.status(200).send({message: "Found top 5 movies with most people", movies: movies, cols: cols })
+    } catch (error) {
+        return res.status(400).send({message: "Unable to find top 5 movies with most people"})
+    }
+})
+
+
+
+app.post("/find-same-bday-actors", authMiddleware.checkToken, async(req, res) => {
+    try {
+        const [actors, cols] = await QueryService.findSameBirthDayActors();
+        return res.status(200).send({message: "Found actors with same birthday", actors: actors, cols: cols })
+    } catch (error) {
+        return res.status(400).send({message: "Unable to find actors with same birthday"})
+    }
+})
+
+
 
 app.post("/signup", async (req, res) => {
     try {

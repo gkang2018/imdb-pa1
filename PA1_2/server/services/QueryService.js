@@ -473,7 +473,7 @@ const findDirectorByZipcode = async (query) => {
 const findPeopleReceivedKAwards = async (query) => {
     try {
         await pool.query(`USE IMDB_PA1`);
-        const [rows, fields] = await pool.query(`SELECT a.pid, a.mpid, a.award_year, COUNT(*) FROM Award a GROUP BY a.pid, a.award_year, a.mpid HAVING COUNT(*) > ?`, [query]);
+        const [rows, fields] = await pool.query(`SELECT p.name, mp.name as Picture, a.award_year, COUNT(*) as award_count FROM Award a, MotionPicture mp, People p WHERE mp.id=a.mpid AND p.id=a.pid GROUP BY a.pid, a.award_year, a.mpid HAVING COUNT(*) > ?`, [query]);
         if (rows.length === 0) {
             console.log('No people found');
             return [[], []]
@@ -489,10 +489,10 @@ const findPeopleReceivedKAwards = async (query) => {
     }
 }
 
-const findYoungestAndOldest = async (query) => {
+const findYoungestAndOldest = async () => {
     try {
         await pool.query(`USE IMDB_PA1`);
-        const [rows, fields] = await pool.query(`SELECT p1.name, CAST(a1.award_year AS INT) - CAST(YEAR(p1.dob) AS INT) as age FROM People p1, Award a1 WHERE p1.id = a1.pid AND (CAST(a1.award_year AS INT) - CAST(YEAR(p1.dob) AS INT) in (SELECT min(CAST(a.award_year AS INT) - CAST(YEAR(p.dob) AS INT)) as min_age FROM Award a, People p WHERE a.pid = p.id) OR CAST(a1.award_year AS INT) - CAST(YEAR(p1.dob) AS INT) in (SELECT max(CAST(a.award_year AS INT) - CAST(YEAR(p.dob) AS INT)) as min_age FROM Award a, People p WHERE a.pid = p.id))`);
+        const [rows, fields] = await pool.query(`SELECT p1.name, CAST(a1.award_year AS int) - CAST(YEAR(p1.dob) AS int) as age FROM People p1, Award a1 WHERE p1.id = a1.pid AND (CAST(a1.award_year AS int) - CAST(YEAR(p1.dob) as int) in (SELECT min(CAST(a2.award_year AS INT) - CAST(YEAR(p2.dob) AS INT)) as min_age FROM Award a2, People p2, Role r2 WHERE a2.pid = p2.id AND r2.pid = p2.id AND r2.role_name="Actor") OR CAST(a1.award_year AS int) - CAST(YEAR(p1.dob) as int) in (SELECT max(CAST(a3.award_year as int) - CAST(YEAR(p3.dob) as int)) as max_age from Award a3, People p3 WHERE a3.pid=p3.id));`);
         if (rows.length === 0) {
             console.log('No actors found');
             return [[], []]
@@ -511,7 +511,7 @@ const findYoungestAndOldest = async (query) => {
 const findProducersByBudgetAndBoxOffice = async (x, y) => {
     try {
         await pool.query(`USE IMDB_PA1`);
-        const [rows, fields] = await pool.query(`SELECT p.name, mp.name, m.boxoffice_collection, mp.budget FROM People p, MotionPicture mp, Movies m, Role r WHERE p.id = r.pid AND mp.id = m.mpid AND r.role_name = "Producer" AND p.nationality = "USA" AND m.boxoffice_collection >= ? AND mp.budget <= ?`, [x, y]);
+        const [rows, fields] = await pool.query(`SELECT p.name, mp.name, m.boxoffice_collection, mp.budget FROM People p, MotionPicture mp, Movies m, Role r WHERE p.id = r.pid AND mp.id = m.mpid AND r.role_name = "Producer" AND p.nationality = "USA" AND m.boxoffice_collection >= ? AND mp.budget <= ?`, [x, y]);
         if (rows.length === 0) {
             console.log('No producers found');
             return [[], []]
@@ -530,7 +530,7 @@ const findProducersByBudgetAndBoxOffice = async (x, y) => {
 const findPeopleMultRoles = async (query) => {
     try {
         await pool.query(`USE IMDB_PA1`);
-        const [rows, fields] = await pool.query(`SELECT p.name, mp.name, COUNT(*) as num_roles FROM Role r, MotionPicture mp, People p WHERE mp.id = r.mpid AND p.id = r.pid AND mp.rating > ? GROUP BY r.pid, r.mpid HAVING COUNT(*) > 1;`, [query]);
+        const [rows, fields] = await pool.query(`SELECT p.name as actor_name, mp.name, COUNT(*) as num_roles FROM Role r, MotionPicture mp, People p WHERE mp.id = r.mpid AND p.id = r.pid AND mp.rating > ? GROUP BY r.pid, r.mpid HAVING COUNT(*) > 1;`, [query]);
         if (rows.length === 0) {
             console.log('No people found');
             return [[], []]
@@ -550,7 +550,7 @@ const findPeopleMultRoles = async (query) => {
 const findTopTwoThrillers = async () => {
     try {
         await pool.query(`USE IMDB_PA1`);
-        const [rows, fields] = await pool.query(`SELECT * FROM MotionPicture mp, Genre g WHERE g.mpid = mp.id AND g.genre_name = "Thriller" AND mp.rating in (SELECT mp.rating from Genre g1, MotionPicture mp1 where mp1.id = g1.mpid AND g1.genre_name = "Thriller" ORDER BY mp.rating DESC) AND mp.id in (SELECT DISTINCT l1.mpid FROM Location l1 WHERE l1.city = "Boston" AND l1.mpid NOT IN (SELECT DISTINCT l.mpid FROM Location l WHERE l.city != "Boston"))`, []);
+        const [rows, fields] = await pool.query(`SELECT mp.name, mp.rating FROM MotionPicture mp, Genre g WHERE g.mpid = mp.id AND g.genre_name = "Thriller" AND mp.rating in (SELECT mp.rating from Genre g1, MotionPicture mp1 where mp1.id = g1.mpid AND g1.genre_name = "Thriller" ORDER BY mp.rating DESC) AND mp.id in (SELECT DISTINCT l1.mpid FROM Location l1 WHERE l1.city = "Boston" AND l1.mpid NOT IN (SELECT DISTINCT l.mpid FROM Location l WHERE l.city != "Boston"))`, []);
         if (rows.length === 0) {
             console.log('No movies found');
             return [[], []]
@@ -569,7 +569,7 @@ const findTopTwoThrillers = async () => {
 const findMoviesByLikesAndAge = async (x,y) => {
     try {
         await pool.query(`USE IMDB_PA1`);
-        const [rows, fields] = await pool.query(`SELECT mp.name, COUNT(*) FROM Likes l, Users u, MotionPicture mp WHERE l.mpid = mp.id AND l.uemail = u.email AND u.age < ? GROUP BY l.mpid HAVING COUNT(*) > ?;`, [y, x]);
+        const [rows, fields] = await pool.query(`SELECT mp.name, COUNT(*) as 'Number of Likes' FROM Likes l, Users u, MotionPicture mp WHERE l.mpid = mp.id AND l.uemail = u.email AND u.age < ? GROUP BY l.mpid HAVING COUNT(*) > ?`, [y, x]);
         if (rows.length === 0) {
             console.log('No movies found');
             return [[], []]
@@ -585,10 +585,10 @@ const findMoviesByLikesAndAge = async (x,y) => {
     }
 }
 
-const findActorsBothMarvelDC = async (query) => {
+const findActorsBothMarvelWarner = async () => {
     try {
         await pool.query(`USE IMDB_PA1`);
-        const [rows, fields] = await pool.query(`SELECT p.name as actor_name, mp.name FROM People p, MotionPicture mp, Role r where r.mpid = mp.id AND p.id = r.pid AND p.id in (SELECT r.pid FROM MotionPicture mp, Role r where r.mpid = mp.id AND mp.production = "Marvel" AND r.role_name = "Actor") AND p.id in (SELECT r.pid FROM MotionPicture mp, Role r where r.mpid = mp.id AND mp.production = "DC" AND r.role_name = "Actor")`);
+        const [rows, fields] = await pool.query(`SELECT p.name as actor_name, mp.name FROM People p, MotionPicture mp, Role r where r.mpid = mp.id AND p.id = r.pid AND p.id in (SELECT r.pid FROM MotionPicture mp, Role r where r.mpid = mp.id AND mp.production = "Marvel" AND r.role_name = "Actor") AND p.id in (SELECT r.pid FROM MotionPicture mp, Role r where r.mpid = mp.id AND mp.production = "Warner Bros" AND r.role_name = "Actor")`);
         if (rows.length === 0) {
             console.log('No actors found');
             return [[], []]
@@ -607,7 +607,7 @@ const findActorsBothMarvelDC = async (query) => {
 const findMoviesHigherRatingComedy = async () => {
     try {
         await pool.query(`USE IMDB_PA1`);
-        const [rows, fields] = await pool.query(`SELECT * FROM MotionPicture mp WHERE mp.rating > (SELECT AVG(mp.rating) FROM Genre g, MotionPicture mp WHERE mp.id = g.mpid AND g.genre_name = "Comedy") ORDER BY mp.rating DESC`);
+        const [rows, fields] = await pool.query(`SELECT mp.name, mp.rating FROM MotionPicture mp WHERE mp.rating > (SELECT AVG(mp.rating) FROM Genre g, MotionPicture mp WHERE mp.id = g.mpid AND g.genre_name = "COMEDY") ORDER BY mp.rating DESC;`);
         if (rows.length === 0) {
             console.log('No movies found');
             return [[], []]
@@ -624,7 +624,7 @@ const findMoviesHigherRatingComedy = async () => {
 }
 
 
-const findTop5WithMostPeople = () => {
+const findTop5WithMostPeople = async () => {
     try {
         await pool.query(`USE IMDB_PA1`);
         const [rows, fields] = await pool.query(`SELECT mp.name, COUNT(*) as num_roles FROM Role r, MotionPicture mp, Movies m, People p WHERE mp.id = m.mpid AND mp.id = r.mpid AND p.id = r.pid GROUP BY r.mpid ORDER BY COUNT(*) DESC LIMIT 5`);
@@ -643,19 +643,18 @@ const findTop5WithMostPeople = () => {
     }
 }
 
-const findSameBirthDayActors = async (query) => {
+const findSameBirthDayActors = async () => {
     try {
         await pool.query(`USE IMDB_PA1`);
-        const [rows, fields] = await pool.query(`SELECT p1.name as Actor1, p2.name as Actor2, p1.dob as DOB FROM People p1, People p2, Role r WHERE p1.id != p2.id AND p1.dob = p2.dob AND p1.id = r.pid`, [query]);
+        const [rows, fields] = await pool.query(`SELECT p1.name as Actor1, p2.name as Actor2, p1.dob as DOB FROM People p1, People p2, Role r WHERE p1.id != p2.id AND p1.dob = p2.dob AND p1.id = r.pid`);
         if (rows.length === 0) {
-            console.log('No directors found');
+            console.log('No actors found');
             return [[], []]
         }
         else {
-            console.log(rows)
-            const directors = rowParser(rows);
-            const columnNames = extractColumns(directors);
-            return [directors, columnNames]
+            const actors = rowParser(rows);
+            const columnNames = extractColumns(actors);
+            return [actors, columnNames]
         }  
     } catch (error) {
         console.log(error);
@@ -718,7 +717,7 @@ module.exports = {
     findPeopleMultRoles: findPeopleMultRoles,
     findTopTwoThrillers: findTopTwoThrillers,
     findMoviesByLikesAndAge: findMoviesByLikesAndAge,
-    findActorsBothMarvelDC: findActorsBothMarvelDC,
+    findActorsBothMarvelWarner: findActorsBothMarvelWarner,
     findMoviesHigherRatingComedy: findMoviesHigherRatingComedy,
     findTop5WithMostPeople: findTop5WithMostPeople,
     findSameBirthDayActors: findSameBirthDayActors,

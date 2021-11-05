@@ -13,7 +13,11 @@ const Home = ({handleShowSnackbar, handleLogin}) => {
         queryMotionPicName: "",
         queryLikesWithEmail: "",
         queryMPByLocation: "",
-        queryDirectorByZip: "", 
+        queryDirectorByZip: "",
+        queryPeopleKAwards: "", 
+        queryProducersBudgetBox: "",
+        queryPeopleMultRoleRatingK: "",
+        queryMoviesLikesAndAge: "",
     })
     const history = useHistory();
 
@@ -337,6 +341,257 @@ const Home = ({handleShowSnackbar, handleLogin}) => {
         }   
     }
 
+
+    const findPeopleKAwards = async () => {
+        try {
+            const token = getToken();
+            if (token !== "") {
+                const response = await fetch("/find-people-k-awards", {
+                    method: "POST",
+                    headers: {
+                        "Authorization": token
+                    },
+                    body: new URLSearchParams({
+                        query: parameterizedState.queryPeopleKAwards
+                    })
+                });
+                const {people, cols} = await response.json();
+                if (people.length === 0 || cols.length === 0) {
+                    handleShowSnackbar(true, "Unable to fetch people with query " + parameterizedState.queryPeopleKAwards);
+                }
+                setIsMovies(false);
+                setData(people);
+                setColumns(cols);
+            }
+            else {
+                handleShowSnackbar(true, "Please login again as session has expired");
+                history.push("/login")
+            }
+        } catch (error) {
+            console.log(error)
+            handleShowSnackbar(true, error.message)
+        }   
+    }
+    
+
+    const findYoungestAndOldest = async () => {
+        try {
+            const token = getToken();
+            if (token !== "") {
+                const response = await fetch("/find-youngest-oldest-actor", {
+                    method: "POST",
+                    headers: {
+                        "Authorization": token
+                    }
+                });
+                const {actors, cols} = await response.json();
+                if (actors.length === 0 || cols.length === 0) {
+                    handleShowSnackbar(true, "Unable to fetch youngest and oldest actors");
+                }
+                setIsMovies(false);
+                setData(actors);
+                setColumns(cols);
+            }
+            else {
+                handleShowSnackbar(true, "Please login again as session has expired");
+                history.push("/login")
+            }
+        } catch (error) {
+            console.log(error)
+            handleShowSnackbar(true, error.message)
+        }   
+    }
+
+
+    const findProducersByBudgetAndBoxOffice = async () => {
+        try {
+            const token = getToken();
+            if (token !== "") {
+                const [x,y] = parameterizedState.queryProducersBudgetBox.split(" ")
+                const response = await fetch("/find-producers-budget-boxOffice", {
+                    method: "POST",
+                    headers: {
+                        "Authorization": token
+                    },
+                    body: new URLSearchParams({
+                        x: x,
+                        y: y,
+                    })
+                });
+                const {producers, cols} = await response.json();
+                if (producers.length === 0 || cols.length === 0) {
+                    handleShowSnackbar(true, "Unable to fetch producers");
+                }
+                setIsMovies(false);
+                setData(producers);
+                setColumns(cols);
+            }
+            else {
+                handleShowSnackbar(true, "Please login again as session has expired");
+                history.push("/login")
+            }
+        } catch (error) {
+            console.log(error)
+            handleShowSnackbar(true, error.message)
+        }   
+    }
+
+
+
+    const findPeopleMultRolesRatingMoreThanK = async () => {
+        try {
+            const token = getToken();
+            if (token !== "") {
+                const response = await fetch("/find-people-mult-roles", {
+                    method: "POST",
+                    headers: {
+                        "Authorization": token
+                    },
+                    body: new URLSearchParams({
+                        query: parameterizedState.queryPeopleMultRoleRatingK
+                    })
+                });
+                const {people, cols} = await response.json();
+                if (people.length === 0 || cols.length === 0) {
+                    handleShowSnackbar(true, "Unable to fetch people");
+                }
+                setIsMovies(false);
+                setData(people);
+                setColumns(cols);
+            }
+            else {
+                handleShowSnackbar(true, "Please login again as session has expired");
+                history.push("/login")
+            }
+        } catch (error) {
+            console.log(error)
+            handleShowSnackbar(true, error.message)
+        }   
+    }
+    
+
+    const findTopTwoThrillers = async () => {
+        try {
+            const token = getToken();
+            if (token !== "") {
+                const response = await fetch("/find-top-two-thrillers", {
+                    method: "POST",
+                    headers: {
+                        "Authorization": token
+                    }
+                });
+                const {movies, cols} = await response.json();
+                if (movies.length === 0 || cols.length === 0) {
+                    handleShowSnackbar(true, "Unable to fetch movies");
+                }
+                setIsMovies(false);
+                setData(movies);
+                setColumns(cols);
+            }
+            else {
+                handleShowSnackbar(true, "Please login again as session has expired");
+                history.push("/login")
+            }
+        } catch (error) {
+            console.log(error)
+            handleShowSnackbar(true, error.message)
+        }   
+    }
+
+
+    const findMoviesByLikesAndAge = async () => {
+        try {
+            const token = getToken();
+            if (token !== "") {
+                console.log(parameterizedState.queryMoviesLikesAndAge)
+                const [x,y] = parameterizedState.queryMoviesLikesAndAge.split(" ")
+                const response = await fetch("/find-movies-likes-ages", {
+                    method: "POST",
+                    headers: {
+                        "Authorization": token
+                    },
+                    body: new URLSearchParams({
+                        x: x,
+                        y: y,
+                    })
+                });
+                const {movies, cols} = await response.json();
+                if (movies.length === 0 || cols.length === 0) {
+                    handleShowSnackbar(true, "Unable to fetch movies");
+                }
+                setIsMovies(false);
+                setData(movies);
+                setColumns(cols);
+            }
+            else {
+                handleShowSnackbar(true, "Please login again as session has expired");
+                history.push("/login")
+            }
+        } catch (error) {
+            console.log(error)
+            handleShowSnackbar(true, error.message)
+        }   
+    }
+
+
+
+    const findActorsMarvelAndWarner = async () => {
+        try {
+            const token = getToken();
+            if (token !== "") {
+                const response = await fetch("/find-actors-marvel-warner", {
+                    method: "POST",
+                    headers: {
+                        "Authorization": token
+                    }
+                });
+                const {actors, cols} = await response.json();
+                if (actors.length === 0 || cols.length === 0) {
+                    handleShowSnackbar(true, "Unable to fetch actors");
+                }
+                setIsMovies(false);
+                setData(actors);
+                setColumns(cols);
+            }
+            else {
+                handleShowSnackbar(true, "Please login again as session has expired");
+                history.push("/login")
+            }
+        } catch (error) {
+            console.log(error)
+            handleShowSnackbar(true, error.message)
+        }   
+    }
+
+    const findMoviesHigherRatingComedy = async () => {
+        try {
+            const token = getToken();
+            if (token !== "") {
+                const response = await fetch("/find-movies-higher-comedy", {
+                    method: "POST",
+                    headers: {
+                        "Authorization": token
+                    }
+                });
+                const {movies, cols} = await response.json();
+                if (movies.length === 0 || cols.length === 0) {
+                    handleShowSnackbar(true, "Unable to fetch movies");
+                }
+                setIsMovies(false);
+                setData(movies);
+                setColumns(cols);
+            }
+            else {
+                handleShowSnackbar(true, "Please login again as session has expired");
+                history.push("/login")
+            }
+        } catch (error) {
+            console.log(error)
+            handleShowSnackbar(true, error.message)
+        }   
+    }
+    
+
     return (
         <div>
             <ButtonGroup style={{marginTop: "5%", marginBottom: "5%", marginRight: "5%"}}>
@@ -358,6 +613,20 @@ const Home = ({handleShowSnackbar, handleLogin}) => {
             </ButtonGroup>
             <ButtonGroup style={{marginBottom: "5%", marginRight: "5%"}}>
                 <SearchBar placeholder={"Search TV Director by zip"} keyName = {"queryDirectorByZip"} handleSubmit={findDirectorByZipcode} onChange={handleInputChange} />
+                <SearchBar placeholder={"Search People Received K awards"} keyName = {"queryPeopleKAwards"} handleSubmit={findPeopleKAwards} onChange={handleInputChange} />
+                <Button style={{marginRight: "1%"}} variant="contained" color="primary" onClick={findYoungestAndOldest}>Find youngest and oldest</Button>
+                <SearchBar placeholder={"Search Producers Budget Box Office"} keyName = {"queryProducersBudgetBox"} handleSubmit={findProducersByBudgetAndBoxOffice} onChange={handleInputChange} />
+            </ButtonGroup>
+            <ButtonGroup style={{marginBottom: "5%", marginRight: "5%"}}>
+                <SearchBar placeholder={"People with multiple roles in movies with rating more than k"} keyName = {"queryPeopleMultRoleRatingK"} handleSubmit={findPeopleMultRolesRatingMoreThanK} onChange={handleInputChange} />
+                <Button style={{marginRight: "1%"}} variant="contained" color="primary" onClick={findTopTwoThrillers}>Find top 2 thrillers in Boston</Button>
+                <SearchBar placeholder={"Search Movies by likes and age"} keyName = {"queryMoviesLikesAndAge"} handleSubmit={findMoviesByLikesAndAge} onChange={handleInputChange} />
+                <Button style={{marginRight: "1%"}} variant="contained" color="primary" onClick={findActorsMarvelAndWarner}>Find actors in Marvel and Warner</Button>
+            </ButtonGroup>
+            <ButtonGroup style={{marginBottom: "5%", marginRight: "5%"}}>
+                <Button style={{marginRight: "1%"}} variant="contained" color="primary" onClick={findMoviesHigherRatingComedy}>Find mps higher avg rating than comedy 2</Button>
+                <SearchBar placeholder={"Search Movies by likes and age"} keyName = {"queryMoviesLikesAndAge"} handleSubmit={findMoviesByLikesAndAge} onChange={handleInputChange} />
+                <Button style={{marginRight: "1%"}} variant="contained" color="primary" onClick={findActorsMarvelAndWarner}>Find actors in Marvel and Warner</Button>
             </ButtonGroup>
             <TableComponent columns={columns} rows={data} isMovies = {isMovies} handleShowSnackbar={handleShowSnackbar} />
         </div>
